@@ -2,8 +2,11 @@ var gulp        = require('gulp');
 var browserSync = require('browser-sync');
 var sass        = require('gulp-sass');
 var prefix      = require('gulp-autoprefixer');
+var jade        = require('gulp-jade');
 var cp          = require('child_process');
-
+var exec        = cp.exec;
+var os          = require('os');
+var jekyll      = process.platform === "win32" ? "jekyll.bat" : "jekyll";
 var messages = {
     jekyllBuild: '<span style="color: grey">Running:</span> $ jekyll build'
 };
@@ -11,11 +14,12 @@ var messages = {
 /**
  * Build the Jekyll Site
  */
-gulp.task('jekyll-build', function (done) {
-    browserSync.notify(messages.jekyllBuild);
-    return cp.spawn('jekyll', ['build'], {stdio: 'inherit'})
-        .on('close', done);
-});
+ // Jekyll task - basically runs the command line command 'jekyll build' with node
+ gulp.task('jekyll-build', function (done) {
+ 		// uses our jekyll variable we made earlier
+     return cp.spawn(jekyll, ['build'], {stdio: 'inherit'})
+         .on('close', done);
+ });
 
 /**
  * Rebuild Jekyll & do page reload
@@ -57,6 +61,15 @@ gulp.task('sass', function () {
 gulp.task('watch', function () {
     gulp.watch('_scss/*.scss', ['sass']);
     gulp.watch(['*.html', '_layouts/*.html', '_posts/*'], ['jekyll-rebuild']);
+});
+
+/*
+jade gulp
+*/
+gulp.task('jade', function(){
+  return gulp.src('_jadefiles/*.jade')
+  .pipe(jade())
+  .pipe(gulp.dest('_includes'));
 });
 
 /**
